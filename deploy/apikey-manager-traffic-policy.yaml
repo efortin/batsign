@@ -1,0 +1,47 @@
+---
+# GatewayExtension for apikey-manager-server External Authorization
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: apikey-ext-auth
+  namespace: kgateway-system
+spec:
+  type: ExtAuth
+  extAuth:
+    grpcService:
+      backendRef:
+        name: apikey-manager-server
+        namespace: kgateway-system
+        port: 9191
+---
+# TrafficPolicy for vLLM - Apply API key auth
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: vllm-api-auth
+  namespace: vllm
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: vllm-api
+  extAuth:
+    extensionRef:
+      name: apikey-ext-auth
+      namespace: kgateway-system
+---
+# TrafficPolicy for Anthropic - Apply API key auth
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: anthropic-api-auth
+  namespace: anthropic
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: anthropic-api
+  extAuth:
+    extensionRef:
+      name: apikey-ext-auth
+      namespace: kgateway-system

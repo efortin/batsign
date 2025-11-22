@@ -1,0 +1,78 @@
+---
+# Custom Resource Definition for API Keys
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: apikeys.auth.kgateway.dev
+spec:
+  group: auth.kgateway.dev
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - email
+                - keyHash
+                - keyHint
+              properties:
+                email:
+                  type: string
+                  description: Email address of the API key owner
+                  pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                keyHash:
+                  type: string
+                  description: SHA-256 hash of the API key (hex encoded)
+                  pattern: '^[a-f0-9]{64}$'
+                keyHint:
+                  type: string
+                  description: Display hint showing first 6 and last 2 chars (e.g., sk-abc***ey)
+                  pattern: '^sk-[a-zA-Z0-9_-]+\*+[a-zA-Z0-9_-]{2}$'
+                description:
+                  type: string
+                  description: Optional description of the API key purpose
+                enabled:
+                  type: boolean
+                  default: true
+                  description: Whether this API key is currently active
+                expiresAt:
+                  type: string
+                  format: date-time
+                  description: Optional expiration date for the API key
+            status:
+              type: object
+              properties:
+                createdAt:
+                  type: string
+                  format: date-time
+                lastUsed:
+                  type: string
+                  format: date-time
+      additionalPrinterColumns:
+        - name: Email
+          type: string
+          jsonPath: .spec.email
+        - name: Key Hint
+          type: string
+          jsonPath: .spec.keyHint
+        - name: Enabled
+          type: boolean
+          jsonPath: .spec.enabled
+        - name: Description
+          type: string
+          jsonPath: .spec.description
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+  scope: Cluster
+  names:
+    plural: apikeys
+    singular: apikey
+    kind: APIKey
+    shortNames:
+      - ak

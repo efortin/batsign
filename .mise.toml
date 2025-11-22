@@ -1,0 +1,92 @@
+[tools]
+go = "1.21"
+
+[tasks.build]
+description = "Build both server and client binaries"
+depends = ["build-server", "build-client"]
+
+[tasks.build-server]
+description = "Build the server binary"
+run = "go build -o bin/batsign-server ./cmd/server"
+
+[tasks.build-client]
+description = "Build the client binary"
+run = "go build -o bin/batsign-client ./cmd/client"
+
+[tasks.build-release]
+description = "Build with optimizations (smaller binaries)"
+run = """
+go build -ldflags='-s -w' -o bin/batsign-server ./cmd/server
+go build -ldflags='-s -w' -o bin/batsign-client ./cmd/client
+"""
+
+[tasks.install]
+description = "Install both binaries to $GOPATH/bin"
+run = """
+go install ./cmd/server
+go install ./cmd/client
+"""
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "rm -rf bin/"
+
+[tasks.test]
+description = "Run all tests (standard + Ginkgo)"
+depends = ["test-go", "test-ginkgo"]
+
+[tasks.test-go]
+description = "Run standard Go tests"
+run = "go test -v ./..."
+
+[tasks.test-ginkgo]
+description = "Run Ginkgo BDD tests"
+run = "ginkgo -r -v ./internal"
+
+[tasks.test-coverage]
+description = "Run tests with coverage report"
+run = "ginkgo -r -v --cover --coverprofile=coverage.out ./internal"
+
+[tasks.lint]
+description = "Run linter"
+run = "golangci-lint run"
+
+[tasks.build-all]
+description = "Build for multiple platforms"
+run = """
+# Server binaries
+GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o bin/batsign-server-linux-amd64 ./cmd/server
+GOOS=linux GOARCH=arm64 go build -ldflags='-s -w' -o bin/batsign-server-linux-arm64 ./cmd/server
+GOOS=darwin GOARCH=amd64 go build -ldflags='-s -w' -o bin/batsign-server-darwin-amd64 ./cmd/server
+GOOS=darwin GOARCH=arm64 go build -ldflags='-s -w' -o bin/batsign-server-darwin-arm64 ./cmd/server
+
+# Client binaries
+GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o bin/batsign-client-linux-amd64 ./cmd/client
+GOOS=linux GOARCH=arm64 go build -ldflags='-s -w' -o bin/batsign-client-linux-arm64 ./cmd/client
+GOOS=darwin GOARCH=amd64 go build -ldflags='-s -w' -o bin/batsign-client-darwin-amd64 ./cmd/client
+GOOS=darwin GOARCH=arm64 go build -ldflags='-s -w' -o bin/batsign-client-darwin-arm64 ./cmd/client
+"""
+
+[tasks.docker-build]
+description = "Build Docker image for local platform"
+run = "docker build -t batsign:latest ."
+
+[tasks.docker-build-multiarch]
+description = "Build and push multi-arch Docker image (linux/amd64, linux/arm64)"
+run = """
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --tag ghcr.io/efortin/batsign:latest \
+  --push \
+  .
+"""
+
+[tasks.docker-build-multiarch-local]
+description = "Build multi-arch Docker image locally (no push)"
+run = """
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --tag batsign:latest \
+  --load \
+  .
+"""

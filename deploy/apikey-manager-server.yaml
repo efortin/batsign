@@ -1,0 +1,121 @@
+---
+# ServiceAccount for apikey-manager-server
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: apikey-manager-server
+  namespace: kgateway-system
+---
+# ClusterRole to read APIKey CRDs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: apikey-manager-server
+rules:
+  - apiGroups: ["auth.kgateway.dev"]
+    resources: ["apikeys"]
+    verbs: ["get", "list", "watch"]
+---
+# ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: apikey-manager-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: apikey-manager-server
+subjects:
+  - kind: ServiceAccount
+    name: apikey-manager-server
+    namespace: kgateway-system
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apikey-manager-server
+  namespace: kgateway-system
+  labels:
+    app: apikey-manager-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apikey-manager-server
+  template:
+    metadata:
+      labels:
+        app: apikey-manager-server
+    spec:
+      serviceAccountName: apikey-manager-server
+      containers:
+        - name: server
+          image: ghcr.io/efortin/batsign:latest
+          imagePullPolicy: Always
+          ports:
+            - name: grpc
+              containerPort: 9191
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+          args:
+            - "--grpc-port=9191"
+            - "--http-port=8080"
+            - "--log-level=info"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        fsGroup: 65534
+---
+# Service for gRPC
+apiVersion: v1
+kind: Service
+metadata:
+  name: apikey-manager-server
+  namespace: kgateway-system
+  labels:
+    app: apikey-manager-server
+spec:
+  type: ClusterIP
+  selector:
+    app: apikey-manager-server
+  ports:
+    - name: grpc
+      port: 9191
+      targetPort: grpc
+      protocol: TCP
+      appProtocol: grpc
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP

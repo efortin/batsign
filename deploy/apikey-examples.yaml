@@ -1,0 +1,40 @@
+# APIKey Examples with Hashed Keys
+#
+# IMPORTANT: API keys are now stored as SHA-256 hashes for security.
+# Use the create-apikey.sh script to generate the hash and hint automatically.
+#
+# Usage:
+#   ./create-apikey.sh <email> <api-key> [description] | kubectl apply -f -
+#
+# Examples:
+#   ./create-apikey.sh user@example.com sk-my-secret-key-123 "Production key" | kubectl apply -f -
+#
+# The script will:
+# 1. Hash the API key with SHA-256
+# 2. Generate a hint showing first 6 and last 2 characters
+# 3. Output YAML ready to apply
+#
+# Note: The actual API key is never stored in Kubernetes - only the hash!
+
+---
+# Example: Manually created APIKey (if you already have the hash)
+apiVersion: auth.kgateway.dev/v1alpha1
+kind: APIKey
+metadata:
+  name: example-user
+spec:
+  email: example@domain.com
+  keyHash: 267611d86a5278c5dd01529a4163c24c551029e001fa6004cb52d43b34239138  # SHA-256 hash
+  keyHint: sk-nai*************do  # First 6 + last 2 chars
+  description: "Example API key"
+  enabled: true
+
+---
+# To disable an API key without deleting it:
+#   kubectl patch apikey user1-at-example-com --type=merge -p '{"spec":{"enabled":false}}'
+#
+# To list all API keys with hints:
+#   kubectl get apikeys
+#
+# To delete an API key:
+#   kubectl delete apikey user1-at-example-com
