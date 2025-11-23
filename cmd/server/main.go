@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/efortin/batsign/internal/models"
 	"github.com/efortin/batsign/internal/server"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	config := &server.Config{
+	config := &models.Config{
 		GRPCPort:   grpcPort,
 		HTTPPort:   httpPort,
 		Namespace:  namespace,

@@ -5,6 +5,10 @@ bin/
 *.so
 *.dylib
 
+# Artifacts (but keep build/ for CI)
+artifacts/
+!build/
+
 # Test files
 *_test.go
 *.test

@@ -1,0 +1,27 @@
+# Lightweight Dockerfile for CI that uses pre-built binaries
+# This avoids rebuilding the binary during Docker build
+ARG TARGETARCH
+
+FROM alpine:latest AS certs
+# Get CA certificates
+RUN apk --no-cache add ca-certificates
+
+# Final stage: minimal runtime image
+FROM scratch
+
+ARG TARGETARCH
+
+# Copy CA certificates (needed for Kubernetes API calls)
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy the pre-built binary for the target architecture
+COPY build/linux/${TARGETARCH}/batsign-server /batsign-server
+
+# Use non-root user (nobody)
+USER 65534:65534
+
+# Expose gRPC and HTTP ports
+EXPOSE 9191 8080
+
+# Run the server
+ENTRYPOINT ["/batsign-server"]

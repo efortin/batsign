@@ -27,6 +27,8 @@ Batsign replaces heavier solutions like OPA with a focused, efficient API key va
 
 ### Installation
 
+The server is available as a container image at `ghcr.io/efortin/batsign:latest`
+
 ```bash
 # 1. Deploy the CRD
 kubectl apply -f deploy/apikey-crd.yaml
@@ -40,6 +42,10 @@ kubectl apply -f deploy/apikey-manager-traffic-policy.yaml
 # 4. Verify
 kubectl get pods -n kgateway-system -l app=apikey-manager-server
 ```
+
+**Available image tags:**
+- `latest` - Latest build from main branch
+- `v1.0.0`, `v1.0`, `v1` - Semantic version releases (when tagged)
 
 ## Usage
 

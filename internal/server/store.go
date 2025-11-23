@@ -58,7 +58,7 @@ func NewAPIKeyStore(kubeconfig, namespace string) (*APIKeyStore, error) {
 	}
 
 	store := &APIKeyStore{
-		keyHashes: make(map[string]*APIKeyEntry),
+		keyHashes: make(map[string]*models.APIKeyEntry),
 		client:    client,
 		namespace: namespace,
 		stopCh:    make(chan struct{}),
@@ -119,7 +119,7 @@ func (s *APIKeyStore) syncAPIKeys(ctx context.Context) error {
 	defer s.mu.Unlock()
 
 	// Clear and repopulate
-	s.keyHashes = make(map[string]*APIKeyEntry)
+	s.keyHashes = make(map[string]*models.APIKeyEntry)
 
 	for _, item := range list.Items {
 		if entry := s.parseAPIKey(&item); entry != nil {

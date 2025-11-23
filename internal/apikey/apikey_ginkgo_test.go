@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/efortin/batsign/internal/apikey"
+	"github.com/efortin/batsign/internal/models"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -152,7 +153,7 @@ var _ = Describe("APIKey", func() {
 	Describe("GenerateYAML", func() {
 		Context("with complete spec", func() {
 			It("should generate valid YAML", func() {
-				spec := apikey.APIKeySpec{
+				spec := models.APIKeySpec{
 					Email:       "user@example.com",
 					KeyHash:     "abc123",
 					KeyHint:     "sk-abc*************de",
@@ -176,7 +177,7 @@ var _ = Describe("APIKey", func() {
 
 		Context("with disabled key", func() {
 			It("should show enabled: false", func() {
-				spec := apikey.APIKeySpec{
+				spec := models.APIKeySpec{
 					Email:       "admin@test.org",
 					KeyHash:     "xyz789",
 					KeyHint:     "sk-xyz*************89",
@@ -193,7 +194,7 @@ var _ = Describe("APIKey", func() {
 
 		Context("email sanitization", func() {
 			It("should sanitize in metadata.name but keep original in spec.email", func() {
-				spec := apikey.APIKeySpec{
+				spec := models.APIKeySpec{
 					Email:       "first.last@company.co.uk",
 					KeyHash:     "hash123",
 					KeyHint:     "sk-abc*************de",

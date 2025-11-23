@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/efortin/batsign/internal/models"
 )
 
 // failingReader is a reader that always returns an error
@@ -237,12 +239,12 @@ func TestValidateEmail(t *testing.T) {
 func TestGenerateYAML(t *testing.T) {
 	tests := []struct {
 		name string
-		spec APIKeySpec
+		spec models.APIKeySpec
 		want string
 	}{
 		{
 			name: "Complete spec",
-			spec: APIKeySpec{
+			spec: models.APIKeySpec{
 				Email:       "user@example.com",
 				KeyHash:     "abc123",
 				KeyHint:     "sk-abc*************de",
@@ -264,7 +266,7 @@ spec:
 		},
 		{
 			name: "Disabled key",
-			spec: APIKeySpec{
+			spec: models.APIKeySpec{
 				Email:       "admin@test.org",
 				KeyHash:     "xyz789",
 				KeyHint:     "sk-xyz*************89",
@@ -301,7 +303,7 @@ spec:
 }
 
 func TestGenerateYAML_EmailSanitization(t *testing.T) {
-	spec := APIKeySpec{
+	spec := models.APIKeySpec{
 		Email:       "first.last@company.co.uk",
 		KeyHash:     "hash123",
 		KeyHint:     "sk-abc*************de",

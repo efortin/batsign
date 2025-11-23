@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/efortin/batsign/internal/models"
 	envoy_service_auth_v3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -21,7 +22,7 @@ import (
 
 // Server represents the authorization server
 type Server struct {
-	config     *Config
+	config     *models.Config
 	store      *APIKeyStore
 	grpcServer *grpc.Server
 	httpServer *http.Server
@@ -29,7 +30,7 @@ type Server struct {
 }
 
 // New creates a new server instance
-func New(config *Config) (*Server, error) {
+func New(config *models.Config) (*Server, error) {
 	// Create API key store
 	store, err := NewAPIKeyStore(config.Kubeconfig, config.Namespace)
 	if err != nil {

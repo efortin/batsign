@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/efortin/batsign/internal/apikey"
+	"github.com/efortin/batsign/internal/models"
 	"github.com/spf13/cobra"
 )
 
@@ -65,7 +66,7 @@ func run(cmd *cobra.Command, args []string) error {
 	keyHint := apikey.GenerateHint(key)
 
 	// Create the spec
-	spec := apikey.APIKeySpec{
+	spec := models.APIKeySpec{
 		Email:       email,
 		KeyHash:     keyHash,
 		KeyHint:     keyHint,
